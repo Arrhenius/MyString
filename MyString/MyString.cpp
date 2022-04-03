@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include "help_func.h"
 #include "MyString.h"
 
@@ -31,7 +32,7 @@ MyString::MyString(const char* pszString)
 		string = (char*)malloc(sizeof(char) * size + 1);
 		if (!string)
 			errExit("Failed to malloc memory for string!", __FILE__, __LINE__);
-
+		memset(string, 0, sizeof(string));
 		ptr = pszString;				// Assign ptr to pszString for traversing
 		ptr2 = string;					// Assign ptr2 to string to copy chars into memory
 		while (*ptr2++ = *pszString++);	// Copy pszString to object variable string
@@ -44,12 +45,15 @@ MyString::MyString(const char* pszString)
 // and then frees the string of that memory.
 MyString::~MyString()
 {
-	// Checks to see if string has anything in it
-	// then frees it if there is something there.
-	if (*string != '\0' || string != NULL)
+	// Wipe allocated memory of data before freeing
+	// This is just in case there is some sort of sensitive data
+	// present and we no longer want any representation of it
+	// in memory
+	if (string)
+	{
+		memset(string, 0, sizeof(string));
 		free(string);
-
-	return;
+	}
 }
 
 // Function reverses the string characters in object variable string
@@ -143,7 +147,7 @@ void MyString::toUpperCase()
 			if (*char_ptr >= 97 && *char_ptr <= 122)// Check to see if the character is lowercase, if it is
 				*char_ptr -= 32;					// proceed to subtract a decimal value of 32 to obtain
 													// the uppercase ascii character
-			char_ptr++;								// Increase pointer position in string by 1
+			char_ptr++;								
 		}
 	}
 }
@@ -179,13 +183,37 @@ void MyString::toLowerCase()
 // handling string objects. It starts at the index indicated
 // by beginIndex and ends at endIndex - 1. beginIndex is
 // an inclusive value while endIndex is exclusive
+// NOTE:
+// The function is meant to allocate memory for a new string and
+// returns a pointer to that string. It is up to the user to remember
+// to free that memory and avoid memory leaks
 char* MyString::subString(int beginIndex, int endIndex)
 {
-
+	char*	substr = NULL;
+	char*	begin;
+	int		size = 0;
+	if (beginIndex < 0)
+	{
+		fprintf(stderr, "beginIndex can't be less than 0!\n");
+		fprintf(stderr, "Return from function...\n");
+		return;
+	}
+	if (endIndex > getSize())
+	{
+		fprintf(stderr, "endIndex is greater than the size of the string!\n");
+		fprintf(stderr, "Value provided can't be greater than string size\n");
+		fprintf(stderr, "Function is returning");
+		return;
+	}
+	size = endIndex - beginIndex;
+	substr = (char*) malloc(sizeof(char) * (size + 1));
+	if (!substr)
+	{
+		fprintf(stderr, "Failed to allocate memory for substring!\n");
+		fprintf(stderr, "Returning from function with NULL value...\n");
+		return NULL;
+	}
 }
-
-
-
 
 int MyString::getSize()
 {
